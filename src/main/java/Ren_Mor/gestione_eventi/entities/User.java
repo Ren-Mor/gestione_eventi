@@ -1,5 +1,6 @@
 package Ren_Mor.gestione_eventi.entities;
 
+import Ren_Mor.gestione_eventi.enums.Ruolo;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,13 +20,13 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private String ruolo;
+    private Ruolo ruolo;
 
     @Column(nullable = false)
     private String email;
 
     // Costruttore
-    public User(String username, String password, String ruolo, String email) {
+    public User(String username, String password, Ruolo ruolo, String email) {
         this.email = email;
         this.username = username;
         this.password = password;
