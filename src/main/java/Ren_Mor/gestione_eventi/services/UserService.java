@@ -39,7 +39,6 @@ public class UserService {
 
         found.setEmail(payload.email());
         found.setPassword(payload.password());
-        // found.setAvatarURL("https://ui-avatars.com/api/?name=" + payload.name() + "+" + payload.surname()); // decommenta se serve
 
         User modifiedUser = usersRepository.save(found);
 
