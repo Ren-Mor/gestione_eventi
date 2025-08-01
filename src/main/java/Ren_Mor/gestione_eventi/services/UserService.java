@@ -1,6 +1,7 @@
  package Ren_Mor.gestione_eventi.services;
 
 import Ren_Mor.gestione_eventi.entities.User;
+import Ren_Mor.gestione_eventi.enums.Ruolo;
 import Ren_Mor.gestione_eventi.exceptions.BadRequestException;
 import Ren_Mor.gestione_eventi.payloads.NewUserDTO;
 import Ren_Mor.gestione_eventi.repositories.UserRepository;
@@ -59,5 +60,15 @@ public class UserService {
     public void delete(Long userId) {
         User user = findById(userId);
         usersRepository.delete(user);
+    }
+
+    public User save(NewUserDTO payload) {
+        // Controllo email duplicata
+        usersRepository.findByEmail(payload.email()).ifPresent(user -> {
+            throw new BadRequestException("L'email " + user.getEmail() + " è già in uso!");
+        });
+
+        User newUser = new User(payload.username(), payload.password(), Ruolo.UTENTE, payload.email());
+        return usersRepository.save(newUser);
     }
 }
