@@ -21,8 +21,12 @@ public class User {
     @Column(nullable = false)
     private String ruolo;
 
+    @Column(nullable = false)
+    private String email;
+
     // Costruttore
-    public User(String username, String password, String ruolo) {
+    public User(String username, String password, String ruolo, String email) {
+        this.email = email;
         this.username = username;
         this.password = password;
         this.ruolo = ruolo;
