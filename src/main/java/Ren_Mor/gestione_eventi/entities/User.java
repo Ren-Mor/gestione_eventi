@@ -20,6 +20,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Ruolo ruolo;
 
     @Column(nullable = false)
@@ -42,7 +43,7 @@ public class User {
         this.password = password;
     }
 
-    public void setRuolo(String ruolo) {
+    public void setRuolo(Ruolo ruolo) {
         this.ruolo = ruolo;
     }
 }

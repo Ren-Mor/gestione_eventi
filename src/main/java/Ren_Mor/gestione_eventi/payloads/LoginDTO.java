@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 public record LoginDTO(
         @NotEmpty(message = "Username  obbligatorio!")
-        String username,
+        String email,
         @NotEmpty(message = "Password obbligatoria!")
         String password
 ) {}
