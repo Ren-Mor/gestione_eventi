@@ -1,64 +1,63 @@
-package Ren_Mor.gestione_eventi.services;
+ package Ren_Mor.gestione_eventi.services;
 
 import Ren_Mor.gestione_eventi.entities.User;
-import Ren_Mor.gestione_eventi.enums.Ruolo;
 import Ren_Mor.gestione_eventi.exceptions.BadRequestException;
-import Ren_Mor.gestione_eventi.exceptions.NotFoundException;
 import Ren_Mor.gestione_eventi.payloads.NewUserDTO;
 import Ren_Mor.gestione_eventi.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @Slf4j
 public class UserService {
 
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private UserRepository usersRepository;
 
-    public User save(NewUserDTO payload, Ruolo ruolo) {
-        // Verifica email unica
-        Optional<User> existing = userRepository.findByEmail(payload.email());
-        if (existing.isPresent()) {
-            throw new BadRequestException("L'email " + payload.email() + " è già in uso!");
-        }
-
-        // Crea utente
-        User newUser = new User(
-                payload.username(),
-                passwordEncoder.encode(payload.password()),
-                ruolo,
-                payload.email()
-        );
-
-        User savedUser = userRepository.save(newUser);
-        log.info("Utente con id: " + savedUser.getId() + " registrato correttamente.");
-        return savedUser;
-    }
-
-    public Page<User> findAll(int pageNumber, int pageSize, String sortBy) {
-        if (pageSize > 50) pageSize = 50;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy).descending());
-        return userRepository.findAll(pageable);
+    public Page<User> findAll(int page, int size, String sortBy) {
+        return usersRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy)));
     }
 
     public User findById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(userId.intValue()));
+        return usersRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException("Utente non trovato"));
+    }
+
+    public User findByIdAndUpdate(Long userId, NewUserDTO payload) {
+        User found = this.findById(userId);
+
+        if (!found.getEmail().equals(payload.email())) {
+            usersRepository.findByEmail(payload.email()).ifPresent(user -> {
+                throw new BadRequestException("L'email " + user.getEmail() + " è già in uso!");
+            });
+        }
+
+        found.setEmail(payload.email());
+        found.setPassword(payload.password());
+        // found.setAvatarURL("https://ui-avatars.com/api/?name=" + payload.name() + "+" + payload.surname()); // decommenta se serve
+
+        User modifiedUser = usersRepository.save(found);
+
+        log.info("L'utente con id " + found.getId() + " è stato modificato!");
+
+        return modifiedUser;
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("L'utente con l'email " + email + " non è stato trovato!"));
+        return usersRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("Utente non trovato con email: " + email));
+    }
+
+    public User update(Long userId, NewUserDTO payload) {
+        return findByIdAndUpdate(userId, payload);
+    }
+
+    public void delete(Long userId) {
+        User user = findById(userId);
+        usersRepository.delete(user);
     }
 }
